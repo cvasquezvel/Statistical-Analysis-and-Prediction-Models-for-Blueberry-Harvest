@@ -1,0 +1,868 @@
+---
+title: "Trabajo de fin de curso"
+author: "Vásquez Velasco, Christian Richard Alberto"
+date: "18/7/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(scipen = 999)
+```
+
+# Introducción
+
+## Descripción del caso
+
+Se emplearon datos de la campaña de cosecha del cultivo de arándano que se viene realizando en la empresa Agrícola Cerro Prieto, que tiene un área sembrada de cultivo de arándano de 950 hectáreas y 399 hectáreas productoras de arándano hasta la semana 27 de cosecha. Se tienen registros completos del rendimiento obtenido solo en la primera semana de cosecha (semana 27) y se pide crear un modelo predictivo con los datos registrados en la semana 26 y la cosecha que se obtuvo en la semana 27 para ser empleada en las siguientes semanas.
+
+En esta empresa, el cultivo de arándano está distribuido en Sectores, Módulos, Turnos y Válvulas. Cada unidad agrícola descrita anteriormente, engloba la que sigue. En ese sentido, una válvula es la unidad de medida más pequeña y la que se emplea como unidad de observación del presente caso.
+
+*Objetivo general*: Emplear los conocimientos obtenidos en el curso de Estadística Aplicada a la Agroforestería I sobre la base de datos "Inventario Arandano".
+
+*Objetivos específicos*:
+
+- Realizar un análisis exploratorio sobre el "Inventario Arándano".
+
+- Evaluar los indicadores estadísticos descriptivos sobre algunas variables del "Inventario Arándano".
+
+- Comparar los Índices de Biodiversidad para las variedades del "Inventario Arándano".
+
+- Generar un muestreo adecuado para el "Inventario Arándano".
+
+- Aplicar un análisis de correlación y regresión sobre el rendimiento por hectárea obtenido en el cultivo de arándano.
+
+- Ejecutar pruebas de hipótesis sobre algunas variables del "Inventario Arándano".
+
+- Realizar un análisis de clasificación no supervisada de las observaciones del "Inventario Arándano".
+
+- Aplciar un análisis de clasificación supervisada de las observaciones del "Inventario Arándano".
+
+## Variables del caso
+
+Mediante evaluaciones semanañes se obtienen datos de las siguientes variables:
+
+- Variedad: Variedad de arándano sembrada en una válvula.
+
+- Kg_Total_Ha: Rendimiento de frutos (bayas cosechadas) en una semana obtenido en una válvula entre el Área de la válvula. Esta variable puede estar mal obtenida, debido a que existen válvulas no cosechadas completamente en una semana o que se han cosechado bayas que no debieron cosecharse. Es decir, existirán observaciones con sub registros y otras con sobreregistro.
+
+- Área: Número de hectáreas en una válvula.
+
+- Plantas_Ha: Número de plantas totales por válvula entre el área de la válvula.
+
+- Plantas_Productivas_Ha: Número de plantas productivas (que tienen producción de arándano de forma normal y no tienen daños graves por plagas o enfermedades) por válvula entre el área de la válvula.
+
+- Inicio_Fase_1: Número de frutos promedio por planta en estado fenológico llamado "Inicio crema en Fase 1", que se tratan de aquellos frutos que entran en fase de "envero" o "pintado", lo que significa que estos frutos empiezan a tomar el color morado característico del cultivo de arándano. Predomina el color verde frente al color rosado.
+
+- Inicio_Fase_2: Número de frutos promedio por planta en estado fenológico llamado "Inicio crema en Fase 2", que se caracteriza por tener una mayor coloración del fruto, a comparación del anterior, pero con menores tonalidades verdosas.
+
+- Cremas: Número de frutos promedio por planta en estado fenológico llamado "Crema", que se caracteriza por tener una mayor coloración del rosada a ligeramente morada que se presenta en toda la cobertura del fruto.
+
+- Maduras: Número de frutos promedio por planta en estado fenológico llamado "Madura", que se caracteriza por tener una coloración completamente morada, pero, que no puede ser consumida aún debido a que no tiene el dulzor necesario, que se mide en grados Brix.
+
+- Cosechable: Número de frutos promedio por planta en estado fenológico llamado "Cosechable", que se caracteriza por tener una coloración completamente morada y que ya puede ser consumida por el hombre.
+
+- Prop_Plantas_Productivas: Es la razón del número de plantas productivas entre el número de plantas totales por hectárea.
+
+- Peso_Baya: Es el Peso promedio de bayas en kg.
+
+- Prop_Cosechable: Es la proporción de frutos "Cosechables" que pueden ser cosechados en la siguiente semana.
+
+- Prop_Maduras: Es la proporción de frutos "Maduros" que pueden ser cosechados en la siguiente semana.
+
+- Prop_Cremas: Es la proporción de frutos "Cremas" que pueden ser cosechados en la siguiente semana.
+
+- Prop_Inicio_Fase_2: Es la proporción de frutos en "Inicio Crema fase 2" que pueden ser cosechados en la siguiente semana.
+
+- Prop_Inicio_Fase_1: Es la proporción de frutos en "Inicio Crema fase 1" que pueden ser cosechados en la siguiente semana.
+
+- Kg_Inicio_Fase_1_Ha_Proy: Estimado del Peso de frutos en fase de "Inicio Crema Fase 1" que serían cosechados por hectárea en una válvula en la siguiente semana.
+
+- Kg_Inicio_Fase_2_Ha_Proy: Estimado del Peso de frutos en fase de "Inicio Crema Fase 2" que serían cosechados por hectárea en una válvula en la siguiente semana.
+
+- Kg_Cremas_Ha_Proy: Estimado del Peso de frutos en fase "Crema" que serían cosechados por hectárea en una válvula en la siguiente semana.
+
+- Kg_Maduras_Ha_Proy: Estimado del Peso de frutos en fase "Madura" que serían cosechados por hectárea en una válvula en la siguiente semana.
+
+- Kg_Cosechable_Ha_Proy: Estimado del Peso de frutos en fase "Cosechable" que serían cosechados por hectárea en una válvula en la siguiente semana.
+
+- Cumplimiento: Es la razón del estimado de cosecha total (suma de los kg cosechados en todas las fases en una hectárea) entre los kg cosechados reales por hectárea. 
+
+- Dif_abs: Es la diferencia absoluta entre los kg cosechados reales por hectárea y el estimado de cosecha total (suma de los kg cosechados en todas las fases en una hectárea). 
+
+
+```{r, echo=FALSE, comment=NA, include=FALSE, eval=T, results= 'hide', message=F, warning= F}
+library(ggplot2)
+library(dplyr)
+library(caret)
+library(readxl)
+library(dplyr)
+library(labelled)
+library(psych)
+Arandano <- readxl::read_excel("E:/CHRISTIAN/Maestría Estadística aplicada/Estadística aplicada a la forestería I/Clase 4/Trabajo final/Datos.xlsx", sheet = "Hoja1")
+Arandano.dat <- Arandano
+Arandano.data <- Arandano.dat %>%
+  filter(Semana_Proy %in% "27")
+
+Arandano.data <- as.data.frame((Arandano.data[,c(5,59,11,13,15,22:33,
+                                                 47,49,51,53,55,60,61)]))
+
+```
+ 
+Para hacer uso de la información recolectada de campo se tiene que filtrar aquellas válvulas que fueron cosechadas de forma incorrecta, debido a que no alcanzó a cosecharse toda el área por deficit de personal o que se ha cosechado más de lo debido porque le personal ha cosechado aquellas bayas que aún no llegaban a las fases de maduración óptima.
+
+Este procedimiento se realiza calculando cuales son las válvulas con un cumplimiento y diferencia absoluta atípica, eliminándolas de la base de datos, junto a todas las válvulas no cosechadas (con 0 kg cosechados).
+
+ 
+```{r, echo=FALSE, comment=NA, include=FALSE, eval=T, results= 'hide', message=F, warning= F}
+IQRcum <- IQR(Arandano.data$Cumplimiento)
+qcum<-quantile(Arandano.data$Cumplimiento, c(0.25, 0.5, 0.75), type = 7)
+outliers_min_cum<-as.numeric(qcum[1])-1.5*IQRcum
+outliers_max_cum<-as.numeric(qcum[3])+1.5*IQRcum
+
+IQRda <- IQR(na.omit(Arandano.data$Dif_abs))
+qda<-quantile(na.omit(Arandano.data$Dif_abs), c(0.25, 0.5, 0.75), type = 7)
+outliers_min_da<-as.numeric(qda[1])-1.5*IQRda
+outliers_max_da<-as.numeric(qda[3])+1.5*IQRda
+
+Arandano.data2 <- Arandano.data %>%
+  filter(!Kg_Total_Ha %in% "0",
+         Cumplimiento >= qcum[3],
+         Dif_abs <= outliers_max_da)
+nrow(Arandano.data2)
+
+```
+
+Luego de ese procedimiento, se obtiene una base de datos de 63 observaciones.
+
+A esta base de datos se le eliminará todas aquellas variables que no tienen variancia (es decir, tienen valores únicos). Además, se convierte la variable Peso de Baya a unidades en gramos (en vez de kilogramos).
+ 
+```{r, echo=FALSE, comment=NA}
+
+psych::describe(Arandano.data2)
+
+Arandano.sel <- Arandano.data2 %>% 
+  # 1. Convirtiendo a factor----
+  mutate(
+    Peso_Baya1000 = Peso_Baya * 1000
+  ) %>% 
+  # 2. Eliminar variables innecesarios----
+  dplyr::select(-Cumplimiento, -Dif_abs, -Prop_Cosechable, 
+                -Prop_Maduras, -Prop_Inicio_Fase_1, -Kg_Inicio_Fase_1_Ha_Proy, 
+                -Peso_Baya
+                ) %>%
+  # 3. Etiquetando variables---
+  labelled::set_variable_labels(
+    Peso_Baya1000 = "Peso Baya en gramos"
+  )
+```
+
+A esta base de datos resultante le llamaremos "Inventario Arándano".
+
+```{r, echo=FALSE, comment=NA,fig.align='center',fig.width=6,fig.height=4}
+op <- par(mar=c(3,12,2,2),cex=0.8)
+cat("Informacion del inventario:\n")
+str(Arandano.sel)
+cat("Primeros registros")
+nc<-ncol(Arandano.sel)
+head(Arandano.sel[,-nc])
+cat("Total de válvulas:",nrow(Arandano.sel),"\n")
+table(Arandano.sel$Variedad)
+table(Arandano.sel$Variedad) -> tabla
+barplot(tabla,horiz = TRUE,las=1)
+par(op)
+```
+
+# Resultados
+
+## Exploracion y estadisticas de la variedad BILOXI
+
+```{r,echo=FALSE,comment=NA}
+BIL <- subset(Arandano.sel, Arandano.sel$Variedad=="Biloxi")
+summary(BIL[,c(2,5)])
+```
+**Diagrama de Tukey (diagrama de cajas, box plot)**
+
+```{r,echo=FALSE,comment=NA,comment=NA,fig.align='center',fig.width=6,fig.height=3}
+op <- par(mar=c(4,3,2,2),cex=0.8,mfrow=c(1,2))
+KGBIL<-with(BIL, boxplot(Kg_Total_Ha, col="Yellow",main="Rendimiento por hectárea"))
+PPBIL<-with(BIL, boxplot(Plantas_Productivas_Ha, col="orange",main="Plantas productivas por hectárea"))
+KGBIL
+PPBIL
+```
+
+## Exploracion y estadisticas de las Variedades de Arándano
+
+**Estadisticas**
+
+```{r,echo=FALSE,comment=NA}
+library(agricolae)
+promedios <- with(Arandano.sel,tapply.stat(Arandano.sel[,c(2,5)],Variedad,function(x) mean(x,na.rm = TRUE)))
+promedios
+variacion <- with(Arandano.sel,tapply.stat(Arandano.sel[,c(2,5)],Variedad,function(x) sd(x,na.rm = TRUE)))
+variacion
+```
+Se observa que la media del rendimiento (Kg_Total_Ha) fue mayor en la variedad Manila 1° siembra con 131.46 kg . ha^-1 y menor en la variedad Maldiva con 14.38 kg . ha^-1.
+
+Con respecto a la variancia, debido a que solo las variedades Biloxi, Rocio y Ventura poseen más de una observación, son las únicas que registran variancia.
+
+\newpage
+
+**Diagrama de Tukey para la altura de los arboles de las Variedades**
+
+```{r,echo=FALSE,comment=NA,comment=NA,fig.align='center',fig.width=6,fig.height=4}
+op <- par(mar=c(10,2,2,2),cex=0.7)
+kg<-with(Arandano.sel, boxplot(Kg_Total_Ha ~ Variedad, col="Yellow",main="Diagrama del Rendimiento por Variedad",las=2,xlab = ""))
+par(op)
+```
+
+Segun el diagrama de Tukey, se oberva que la variacion del rendimiento no es uniforme y se presentan valores extremos mayormente por encima del conjunto en la variedad Biloxi. La medida central expresada por la mediana es diferente entre las variedades Biloxi, Ventura y Rocio.
+
+\newpage
+
+**Diagrama de Tukey para el número de plantas productivas por hectárea de las Variedades**
+
+```{r,echo=FALSE,comment=NA,comment=NA,fig.align='center',fig.width=6,fig.height=4}
+op <- par(mar=c(10,2,2,2),cex=0.7)
+dap<-with(Arandano.sel, boxplot(Plantas_Productivas_Ha ~ Variedad, col="green",main="Diagrama del número de plantas productivas por hectárea por Variedad",las=2,xlab = ""))
+par(op)
+```
+
+En el número de plantas productivas la variacion fue heterogenea (tamaño de cajas diferentes), se presentan valores extremos por debajo del conjunto en la Variedad Ventura, mas que en otras variedades. Estas respuestas indican que la variacion es muy alta. La mediana es diferente por Variedad, algunas más distantes de las otras. Esto se debe a que existen variedades con densidades de siembra que permiten mayor número de plantas que otras variedades.
+
+## Aplicación de medidas estadísticas
+
+Para establecer la identificacion y diferencias en las medidas, se utilizara el inventario de Arándano.
+
+Se registro informacion de ubicacion y caracteristicas de 8 variedades, de las cuales, solo 3 tienen más de un registro.
+
+```{r,echo=FALSE,comment=NA}
+with(Arandano.sel,table(Variedad))
+```
+
+La descripción de algunas variables permite indicar lo siguiente:
+
+**Escala nominal:**
+
+-   Variedad
+
+**Escala de razon**
+
+-   Kg_Total_Ha
+-   Cremas
+-   Maduras
+
+Su identificacion de algunas medidas, permite agrupar, y son consideradas como factores, en el caso de:
+
+-   Variedad
+
+## Medidas estadisticas
+
+### Representacion de las medidas en graficos.
+
+```{r,echo=FALSE,comment=NA,fig.align='center',fig.width=4,fig.height=3}
+op<-par(mar=c(4,10,2,2))
+Variedades <- table(Arandano.sel$Variedad)
+barplot(Variedades,horiz = TRUE,density=8,col="blue",las=2)
+par(op)
+op<-par(mar=c(0,0,0,0))
+pie(Variedades)
+par(op)
+```
+
+Se puede observar que la variedad con más registros fue Biloxi, seguida de Rocio y Ventura.
+
+Para mostrar graficos entre variables cuantitativas de escala razón se utilizará el rendimiento y el número de frutos maduros por planta en Arándano.
+
+```{r,echo=FALSE,comment=NA,fig.align='center',fig.width=4,fig.height=3}
+op<-par(mar=c(4,4,2,2))
+biloxi<-subset(Arandano.sel,Variedad=="Biloxi")
+pairs(biloxi[,c(2,9)])
+par(op)
+```
+
+Se observa que la relación Rendimiento y Número de frutas maduras por planta es directa y positiva. A mayor número de frutos maduros por planta, el rendimiento es mayor.
+
+Los histogramas y el diagrama de cajas (Tukey) permiten una mejor descripcion.
+
+**BILOXI**
+
+```{r,echo=FALSE,comment=NA,fig.align='center',fig.width=6,fig.height=3}
+op<-par(mar=c(4,4,2,2),mfrow=c(1,2))
+h1<-hist(biloxi$Kg_Total_Ha,main="Biloxi")
+h2<-hist(biloxi$Maduras,main="Biloxi")
+par(op)
+```
+
+Se puede observar que las distribuciones del rendimiento (Kg_Total_Ha) y el número de frutos maduros por planta (Maduras) son asimétricas positivas, con un mayor registro en los valores más bajos de ambas variables.
+
+**Diagrama de cajas para el Rendimiento y número de frutos maduros por planta de todas las variedades**
+
+```{r,echo=FALSE,comment=NA,fig.align='center',fig.width=6,fig.height=3}
+op<-par(mar=c(4,4,2,2),mfrow=c(1,2),cex=0.7)
+b1<-boxplot(Kg_Total_Ha ~ Variedad,data=Arandano.sel,las=2,xlab="")
+h2<-boxplot(Maduras ~ Variedad,data=Arandano.sel,las=2,xlab="")
+par(op)
+```
+
+Por otro lado, la distribución de las variables rendimiento y número de frutos maduros por planta, son muy similares dentro de cada variedad evaluada, por lo que se puede asumir que ambas variables están altamente correlacionadas.
+
+## Indicadores estadísticos.
+
+**1. Indicadores de centralidad**
+
+a)    Promedio. es el punto central de valor continuos y es representativo cuando no se tiene valores extremo.
+
+$$\text{Promedio = }\sum_{i=1}^n \frac{x_i}{n}$$
+
+Para ilustración se utilizara el inventario de Arándano en la variedad Biloxi.
+
+```{r,echo=FALSE,comment=NA}
+Biloxi<-Arandano.sel[Arandano.sel$Variedad=="Biloxi",]
+cat("Promedio de rendimiento de Biloxi:",mean(Biloxi$Kg_Total_Ha,na.rm=TRUE),"kg . ha^-1.\n")
+```
+
+b)    Mediana. Una medida robusta de centralidad, útil cuando hay valores extremos (outlairs), su uso frecuente es en variable de tipo ordinal o de escala jerarquía. El valor es obtenido después de ordenar los datos y obtener el punto que divide al conjunto en dos partes iguales.
+
+Si $X_i$ son los valores ordenados del conjunto, y $n$ es el el numero de datos, entonces la mediana es calculada como:
+
+$$\text{Mediana} = \left \{ \begin{array}{ll}
+(X_{n/2}+X_{n/2+1})/2 & \text{si n es par}\\
+(X_{(n+1)/2}) & \text{si n es impar}
+\end{array} \right.$$
+
+Para ilustración se utilizara el inventario de Arándano en la variedad Biloxi.
+
+```{r,echo=FALSE,comment=NA}
+rendimiento<-Biloxi$Kg_Total_Ha
+x<-sort(rendimiento)
+n<-length(x)
+# Como n es par
+m<-(x[n/2]+x[n/2+1])/2
+cat("Mediana del rendimiento de Biloxi:",median(Biloxi$Kg_Total_Ha,na.rm=TRUE),"kg . ha^-1.\n")
+```
+
+c) Moda. Es el valor mas expresivo del conjunto, en datos cualitativos, es el mas abundante, si hay dos,se indica poblacional bimodal. No es frecuente en datos discretos y mucho en continuos. Sin embargo es posible obtener la moda en datos continuos, después de agruparlos.
+
+$$\text{Moda = Valor mas frecuente del conjunto}$$
+
+```{r,echo=FALSE,comment=NA}
+cat("Moda del rendimiento de Biloxi\n")
+h<-graph.freq(x,plot=FALSE)
+stat.freq(h)$mode
+```
+
+La moda es 13.91 kg . ha^-1.
+
+**2. Indicadores de dispersión**
+
+a) Rango. Es la diferencia de los extremos de los datos. Útil cuando se tiene menos de 10.
+
+$$\text{Rango = max(X)- min(X)}$$
+
+```{r,echo=FALSE,comment=NA}
+cat("Rango del rendimiento de Biloxi:", diff(range(x)),"\n")
+rango <- max(x)-min(x) # es igual
+```
+
+b)    Desviación estándar (S) Medida de variación obtenida frecuentemente de una muestra de mas de 10 datos.
+
+$$S=  \sqrt  {\sum_{i=1}^n \frac{(x_i-\bar{x})^2}{n-1}}   $$
+
+```{r,echo=FALSE,comment=NA}
+cat("Desviación estándar del rendimiento de Biloxi:", sd(x,na.rm=TRUE),"kg - ha^-1.\n")
+```
+
+c)    Varianza $(S^2)$ Medida de variación obtenida frecuentemente de una muestra de mas de 10 datos.
+
+$$S^2=  \sum_{i=1}^n \frac{(x_i-\bar{x})^2}{n-1}   $$
+
+```{r,echo=FALSE,comment=NA}
+cat("Varianza del rendimiento de Biloxi:", var(x,na.rm=TRUE),"kg - ha^-1.\n")
+```
+
+d)    Covarianza. Mide la variación conjunta de dos variables aleatorias.
+
+$$cov(x)=  \sum_{i=1}^n \frac{(x_i-\bar{x})(y_i-\bar{y})}{n-1}   $$
+
+```{r,echo=FALSE,comment=NA}
+cat("Covariancia del rendimiento y número de frutos maduros por planta de Biloxi \n")
+X <- Biloxi[,2,9]
+V <- var(X,na.rm=TRUE)
+V
+```
+
+La variación conjunta de altura y diámetro de Biloxi es de 1264.199.
+
+e)    Rango intercuartil IQR: Medida de variación apropiada cuando hay valores extremos con fines de comparar con otros grupos. Se calcula como la diferencia en los cuartiles 3 y 1
+
+$$IQR= Q3-Q1$$
+
+```{r,echo=FALSE,comment=NA}
+cat("Rango intercuartil del rendimiento de Biloxi:",IQR(Biloxi$Kg_Total_Ha,na.rm=TRUE),"kg . ha^-1.\n")
+```
+
+El Rango intercuartil es 12.71218, esto también significa, como la mediana es 12.10701, entonces 2l $50\%$ de válvulas de Biloxi tienen un rendimiento que esta disperso entre -0.60517 y 24.81919 kg . ha^-1. Aproximadamente seria un variación relativa mayor al $100\%$
+
+f)    Coeficiente de variación CV: Medida de variación relativa, útil para comparar variación de medidas con diferente unidad.
+
+$$CV=\frac{S*100}{\bar{x}}$$
+Su valor es normal si esta entre $10% - 20%$, baja variacion es menos de 10 y alta variacion mayor de 20, aceptable hasta $30\%$
+
+```{r,echo=FALSE,comment=NA}
+cv<-sd(x)*100/mean(x)
+cat("Coeficiente de variacion del rendimiento de Biloxi:",cv,"%.\n")
+```
+
+La medida relativa de variación es superior al aceptable, con $150.1217\%$, por lo tanto se considera como variación heterogénea.
+
+**3. Indicadores de la forma de los datos**
+
+```{r,echo=FALSE,comment=NA}
+cat("Coeficiente de asimetría del rendimiento de Biloxi:",skewness(x),"\n")
+```
+
+El valor es muy lejano a cero y positivo, por lo tanto es asimétrica positiva.
+
+Gráficamente se observa su forma del rendimiento, donde la mayor cantidad de válvulas registradas tiene valores más bajos (entre 1 a 50 kg . ha^-1).
+
+```{r,echo=FALSE,comment=NA,fig.align='center',fig.width=4,fig.height=3}
+h<-graph.freq(x,frequency = 3,ylim=c(0,0.25))
+polygon.freq(h,col="red",lwd=2,frequency = 3)
+lines(density(x),col="blue")
+h<-graph.freq(x,frequency = 3,border="white",ylim=c(0,0.25))
+polygon.freq(h,col="red",lwd=2,frequency = 3)
+lines(density(x),col="blue")
+```
+
+**Tallos y Hojas**
+
+En el diagrama de tallos y hojas, se observa igualmente que la mayor cantidad de observaciones posee valores por debajo a un rendimiento de 20 kg . ha^-1.
+
+```{r,echo=FALSE,comment=NA}
+stem(x)
+```
+
+## Índices de biodiversidad
+
+### Índice de diversidad de Margalef (R)
+
+Aplicar el indice en el inventario Arándano.
+
+```{r,echo=FALSE, comment=NA}
+table(Arandano.sel[,1]) -> tabla
+tabla
+```
+
+Se observa del inventario que hay 8 variedades diferentes.
+
+```{r,echo=FALSE, comment=NA}
+R <- index.bio(tabla,method = "Margalef", level =  90, nboot = 500)
+```
+Según el método de Margalef hay poca diversidad de variedades.
+
+### Índice de Shannon- Wienner (H ’ ) (equidad)
+
+```{r,echo=FALSE, comment=NA}
+T2 <-table(Arandano.sel$Variedad)
+H <- index.bio(T2,method = "Shannon", level =  90, nboot = 500)
+```
+
+El índice de Shannon indica que existe baja diversidad de variedades.
+
+### Índice de Simpson $(\lambda)$: es un índice de dominancia.
+
+**dominancia**
+
+```{r,echo=FALSE, comment=NA}
+L1 <- index.bio(T2,method = "Simpson.Dom", level =  90, nboot = 500)
+```
+Según el indicador de Simpson para dominancia, existe una dominancia de 33.53 %.
+
+**Diversidad**
+
+```{r,echo=FALSE, comment=NA}
+L2 <- index.bio(T2,method = "Simpson.Div", level =  90, nboot = 500)
+```
+Según el indicador de Simpson para diversidad, existe una diversidad de 66.46 %.
+
+## Índice de Berger Parker (D): 
+
+```{r,echo=FALSE, comment=NA}
+D <- index.bio(T2,method = "Berger.Parker", level =  90, nboot = 500)
+```
+Según el método de Berger Parker, existe mayor diversidad que dominancia, pero aparentemente el valor de ambos es casi igual.
+
+## Índice de McIntosh (M):
+
+```{r,echo=FALSE, comment=NA}
+M <- index.bio(T2,method = "McIntosh", level =  90, nboot = 500)
+```
+Según el índice de McIntosh existe una diversidad de 48.15 %.
+
+
+## Muestreo
+
+**Muestra piloto para tener una idea de la variacion**
+
+```{r,echo=FALSE,comment=NA}
+n0 <-sample(1:31,6)
+n1<-Biloxi[n0,]
+r<-max(n1$Kg_Total_Ha)-min(n1$Kg_Total_Ha)
+r
+```
+
+En el rendimiento de la variedad Biloxi se tiene un rango de 54.10 kg . ha^-1.
+
+```{r,echo=FALSE,comment=NA}
+n<-1.96^2*r^2/0.12^2
+n<-round(n+0.5,0)
+N<-nrow(Biloxi)
+n<- n/(1+n/N)
+n<-round(n+0.5,0)
+cat("Tamaño de muestra optima para Rendimiento:", n, "\n")
+```
+
+Según esta variancia, se necesitaría tomar a toda la población de valvulas de arándano Biloxi para estimar correctamente la media del rendimiento.
+
+**Estimar Rendimiento**
+
+```{r,echo=FALSE,comment=NA}
+n0 <-sample(1:31,n)
+muestra <- Biloxi[n0,]
+summary(muestra$Kg_Total_Ha)
+```
+
+Los verdadero parametros de la poblacion son:
+
+```{r,echo=FALSE,comment=NA}
+summary(Biloxi$Kg_Total_Ha)
+```
+
+## Medidas de asociación y regresión
+
+Se emplearon todos los datos del Inventario Arandano.
+
+**Dispersión y valor de la correlación**
+
+```{r, echo=FALSE, comment=NA,fig.align='center',fig.width=6,fig.height=4}
+op<-par(mar=c(4,4,2,2),cex=0.8)
+with(Arandano.sel,plot(Kg_Total_Ha,Maduras,pch=19,bty="l"))
+with(Arandano.sel,cor(Kg_Total_Ha,Maduras))-> r
+r<-round(r,2)
+v<-paste("r=",r,sep="")
+text(0.5,1.2,v,cex=2)
+par(op)
+```
+
+La correlación entre el rendimiento (Kg_Total_Ha) y el número de frutos maduros es de 0.77, por lo tanto existe una relación positiva entre estas variables.
+
+**Prueba estadistica**
+
+```{r, echo=FALSE, comment=NA}
+with(Arandano.sel,cor.test(Kg_Total_Ha,Maduras))
+```
+p-value: En términos de riesgo, indica la probabilidad de rechazar la hipótesis nula siendo esta verdadera. nuestro caso probabilidad es $2.069~10^{-13}$ nos indica que es imposible de equivocarnos en nuestra decisión y el rechazo de la hipótesis nula se da a un nivel de significancia de 0.001.
+
+Por lo tanto existe suficiente evidencia estadística para concluir que el valor de r es estadísticamente diferente de cero y en este caso existe una relación positiva y estadísticamente significativa.
+
+**Otros métodos**
+
+**Método de Spearman**
+
+Para una mejor observación del comportamiento de la correlación, se utilizara datos de Rendimiento y número de frutos por planta en diferentes estadíos. Como la prueba de Spearman se puede aplicar a datos que sean por lo menos ordinales, no hay problema en aplicarlos en datos continuos o discretos.
+
+```{r, echo=FALSE, comment=NA,fig.align='center',fig.width=6,fig.height=4}
+op<-par(mar=c(4,4,2,2),cex=0.8)
+panel.cor <- function(x, y, digits = 2, prefix = "", cex.cor, ...)
+{
+    usr <- par("usr"); on.exit(par(usr))
+    par(usr = c(0, 1, 0, 1))
+    r <- abs(cor(x, y))
+    txt <- format(c(r, 0.123456789), digits = digits)[1]
+    txt <- paste0(prefix, txt)
+    if(missing(cex.cor)) cex.cor <- 0.8/strwidth(txt)
+    text(0.5, 0.5, txt, cex = cex.cor * r)
+}
+pairs(Arandano.sel[,c(2,6,7,8,9,10)],upper.panel = panel.cor,lower.panel = panel.smooth)
+par(op)
+```
+**Matriz de correlacion**
+
+```{r, echo=FALSE, comment=NA}
+r<-correlation(Arandano.sel[,c(2,6,7,8,9,10)])
+r$correlation
+r$pvalue
+```
+
+Se observa que la correlación por el método de Spearman entre el rendimiento y el resto de variables fue significativa.
+
+```{r, echo=FALSE, comment=NA,fig.align='center',fig.width=3,fig.height=3}
+op<-par(mar=c(4,4,2,2),cex=0.8)
+with(Arandano.sel,plot(Maduras,Kg_Total_Ha,pch=19,col="blue",bty="l"))
+par(op)
+```
+
+## Regresión
+
+Se busca construir un modelo lineal que permita predecir una respuesta mediante un modelo lineal de primer grado. Se entiende que la variable respuesta (dependiente) expuesta a ser predicha, debe ser aleatoria y la variable explicativa (independiente) debe ser fija no sujeta a error.
+
+Para estimar un mejor modelo de regresión, se debe utilizar observaciones lo mas diferentes para contemplar el dominio de la respuesta. Para el siguiente caso se evaluará la influencia del número de frutos maduros por planta sobre el rendimiento del cultivo de arándano.
+
+$$y_i=\alpha + \beta x_i + \epsilon_i$$
+$x_i$: variable independiente (número de frutos maduros).
+
+$y_i$: Variable respuesta (rendimiento), dependiente de $x_i$.
+
+$\alpha$: parámetro intercepto tiene unidades del la variable respuesta (kg . ha^-1).
+
+$\beta$: parámetro la pendiente, tasa de cambio de $y$ al cambiar una unidad en $x$, las unidades es la razón de $y$ e $x$ (kg . ha^-1 / unidades)
+
+**Aplicación**
+
+Usar el inventario Arandano y trabajar con la especie Biloxi.
+
+```{r, echo=FALSE, comment=NA,fig.align='center',fig.width=3,fig.height=3}
+op<-par(mar=c(4,4,2,2),cex=0.8)
+especie <- with(biloxi,tapply.stat(Kg_Total_Ha,Maduras,mean))
+with(especie,plot(Kg_Total_Ha,Maduras,pch=19,bty="l"))
+par(op)
+```
+
+## Construcción del modelo
+
+```{r, echo=FALSE, comment=NA}
+modelo <- lm(Kg_Total_Ha ~ Maduras, data=especie)
+summary(modelo)
+```
+
+De acuerdo a nuestro análisis.
+
+$\hat \alpha= 8.977$
+
+$\hat \beta= 32.269$
+
+Ambos son importantes según el pvalue.
+
+$R^2=0.6636$ que equivale a $66.36\%$ de explicación del rendimiento esta en función del número de frutos maduros por planta.
+
+El p-value es de $0.0002169$ menor a 0.05, se concluye que el modelo e aceptable y con una explicación de la variancia significativa.
+
+## Análisis de la varianza
+
+```{r, echo=FALSE, comment=NA}
+anova(modelo)
+```
+
+Según el análisis de variancia, a un nivel de confianza de 0.05, la variable Maduras es una buena variable regresora.
+
+## Grafico del modelo
+
+```{r, echo=FALSE, comment=NA,fig.align='center',fig.width=3,fig.height=3}
+op<-par(mar=c(4,4,2,2),cex=0.8)
+with(especie,plot(Kg_Total_Ha,Maduras,pch=19,bty="l"))
+abline(modelo,col="blue")
+par(op)
+```
+
+## analisis del residuo
+
+```{r, echo=FALSE, comment=NA,fig.align='center',fig.width=6,fig.height=4}
+op<-par(mfrow=c(2,2),cex=0.8)
+plot(modelo)
+par(op)
+```
+
+**1. La falta de ajuste**
+
+Se observa que no existe una linealidad entre ambas variables, pero, esto se puede deber al bajo tamaño de muestras.
+
+
+**2. La normalidad**
+
+Los residuos no son normales y tienen una asimetría positiva.
+
+**3. La magnitud del error**
+
+El error es heterocedástico, es decir, la variancia no fue constante.
+
+**4. Valores extremos**
+
+Las observaciones 14 y 15 son consideradas como valores extremos.
+
+## Ajuste del modelo
+
+```{r, echo=FALSE, comment=NA}
+modelo1 <- lm(Kg_Total_Ha ~ Maduras + I(Maduras^2), data=especie)
+summary(modelo1)
+```
+
+Usar un termino cuadrático no ayuda a mejorar el  modelo.
+
+## La normalidad de los errores.
+
+```{r, echo=FALSE, comment=NA,fig.align='center',fig.width=3,fig.height=3}
+op<-par(mar=c(4,4,2,2),cex=0.8)
+error <- residuals(modelo)
+plot(density(error), main="Distribución del error")
+shapiro.test(error)
+par(op)
+```
+
+el p-value = 0.001679 nos indica que la normalidad no esta presente, el valor es inferior a 0.10.
+
+### Predecir el rendimiento con valores propuestos
+
+**Predicción del dap utilizado**
+
+```{r, echo=FALSE, comment=NA}
+pred<- predict(modelo)
+especie$prediccion <-pred
+head(especie)
+```
+
+Se observa un resumen de valores predichos del modelo.
+
+**Predicción del dap distinto**
+
+Predecir el rendimiento para maduras = 300 y 500.
+
+```{r, echo=FALSE, comment=NA}
+MadurasNuevo <- c(300,500)
+RendimientoNuevo <- predict(modelo, newdata = data.frame(Maduras=MadurasNuevo))
+cbind(MadurasNuevo,RendimientoNuevo)
+```
+
+
+## Pruebas de hipótesis
+
+### Prueba sobre la media poblacional
+
+La media poblacional es un parametro que mide la centralidad de los datos. Lo que se investiga a travez de una hipotesis, es probar si hay cambios en la medida central.
+
+```{r,echo=FALSE,comment=NA}
+Biloxi <- Arandano.sel[Arandano.sel$Variedad=="Biloxi",]
+Ventura <- Arandano.sel[Arandano.sel$Variedad=="Ventura",]
+Rocio <- Arandano.sel[Arandano.sel$Variedad=="Rocio",]
+```
+
+### Prueba de una cola superior
+
+El interes del investigador es probar que la media del DAP es superior al actual.
+
+Prueba la hipótesis que la media del rendimiento de la Variedad Biloxi es superior a 10 kg . ha^-1.
+
+$H_0: \mu \le 10 kg . ha^-1$ 
+
+$H_1: \mu > 10 kg . ha^-1$ 
+
+$\alpha =0.05$
+
+Utilice la prueba de t-student
+
+```{r,echo=FALSE,comment=NA}
+t.test(Biloxi$Kg_Total_Ha,mu=10,alternative="greater")
+```
+
+**Conclusión**, se rechaza la hipótesis nula (pvalue es menor a 0.05), por lo tanto, hay evidencia estadística para afirmar que la media del rendimiento en la variedad Biloxi es superior a 10 kg . ha^-1.
+
+### Prueba de una cola inferior
+
+```{r,echo=FALSE,comment=NA}
+with(Ventura,t.test(Kg_Total_Ha,mu=10,alternative="less"))
+```
+
+**Conclusión**, se acepta la hipótesis nula (pvalue es menor a 0.05), por lo tanto, hay evidencia estadística para afirmar que la media del rendimiento en la variedad Biloxi no es inferior a 10 kg . ha^-1.
+
+### Limites de confianza
+
+```{r,echo=FALSE,comment=NA}
+with(Rocio,t.test(Kg_Total_Ha,conf.level=0.95))
+```
+
+Los límites de confianza del rendimiento en la variedad Biloxi son 30.30 y 45.77 kg . ha^-1.
+
+### Prueba de dos colas
+
+```{r,echo=FALSE,comment=NA}
+KgVentura<-Ventura$Kg_Total_Ha
+KgRocio <-Rocio$Kg_Total_Ha
+```
+
+
+```{r,echo=FALSE,comment=NA}
+var.test(KgVentura,KgRocio, alternative="two.sided", conf.level = 0.90)
+```
+
+A un nivel de significancia de 0.05, existe suficiente evidencia estadística para concluir que las variancias del rendimiento entre las variedades Ventura y Rocio son diferentes.
+
+```{r,echo=FALSE,comment=NA}
+t.test(KgVentura,KgRocio, alternative="two.sided",var=FALSE)
+```
+
+A un nivel de significancia de 0.05, existe suficiente evidencia estadística para concluir que las medias del rendimiento entre las variedades Ventura y Rocio son diferentes.
+
+## Clasificación no supervisada
+
+```{r,comment=NA,echo=FALSE,fig.width=6,fig.width=4}
+library(cluster)
+op<-par(mar=c(2,2,2,2),cex=0.7)
+# preparacion de los datos
+base <- na.omit(Arandano.sel) %>%
+  filter(Variedad %in% c("Biloxi","Ventura","Rocio"))
+X<- base[, c(2:18)]
+clusplot(pam(X, 3),main="Metodo PAM")
+par(op)
+```
+
+```{r,comment=NA,echo=FALSE,fig.width=6,fig.width=4}
+op<-par(mar=c(2,2,2,2),cex=0.7)
+clusplot(fanny(X,3),main="Metodo FANNY")
+par(op)
+```
+
+```{r,comment=NA,echo=FALSE,fig.width=6,fig.width=4}
+op<-par(mar=c(2,2,2,2),cex=0.7)
+clusplot(clara(X, 3),main="Metodo CLARA")
+par(op)
+```
+
+**kmeans**
+
+La informacion debe ser cuantitativa
+
+```{r,comment=NA,echo=FALSE}
+modelo <- kmeans(X,3)
+names(modelo)
+clase <- modelo$cluster
+head(clase)
+table(clase)
+table(base$Variedad)
+clasificado <- data.frame(variedad=base$Variedad,clase)
+with(clasificado,table(variedad,clase))
+```
+## Clasificación supervisada
+
+**Analisis discriminante lineal de Fisher**
+
+La informacion debe ser cuantitativa.
+
+```{r,comment=NA,echo=FALSE}
+library(MASS)
+modelo <- lda(Variedad ~ ., data=base)
+names(modelo)
+print(modelo)
+y <- predict(modelo)
+names(y)
+head(y$class)
+clase <-y$class
+variedad <- base$Variedad
+Z<-table(variedad,clase)
+print(Z)
+acierto <- sum(diag(Z))*100/sum(Z)
+Error <- 100-sum(diag(Z))*100/sum(Z)
+cat("% de acierto:", acierto, "\n")
+cat("% error aparente:", Error, "\n")
+```
+
+Se tuvo una tasa de acierto de 100 % al determinar las variedades con todas las variables regresoras de la base de datos del inventario Arandano.
